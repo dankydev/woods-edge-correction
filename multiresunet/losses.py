@@ -7,7 +7,8 @@ import torch
 import torchvision
 from torch import nn
 from torch.nn.modules.loss import _Loss
-from correction_dataset import WoodCorrectionDataset
+
+from multiresunet.correction_dataset import WoodCorrectionDataset
 
 
 class MeanShift(nn.Conv2d):
@@ -38,6 +39,7 @@ class VGGLoss(_Loss):
         self.mean_shift.to(device)
 
     def get_vgg_features(self, x):
+        x = x.to('cuda')
         x = self.mean_shift(x)
         x = self.vgg(x)
         return x
@@ -101,9 +103,10 @@ if __name__ == "__main__":
         drop_last=True
     )
 
-    for img in dl:
-        misaligned = img[0]
-        aligned = img[1]
+
+    for couple in dl:
+        misaligned = couple[0][0]
+        aligned = couple[1][0]
 
         my_loss = loss.forward(misaligned, aligned)
         print(f"Loss evaluated: {my_loss:.2f}")
