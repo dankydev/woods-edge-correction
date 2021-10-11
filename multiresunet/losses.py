@@ -7,7 +7,7 @@ import torch
 import torchvision
 from torch import nn
 from torch.nn.modules.loss import _Loss
-
+import pytorch_msssim
 from multiresunet.correction_dataset import WoodCorrectionDataset
 
 
@@ -60,26 +60,33 @@ class VGGLoss(_Loss):
 
 class WoodCorrectionLoss(_Loss):
 
-    def __init__(self, mse_w, ssim_w, vgg_w, device='cuda'):  # mse is L1
+    def __init__(self, mse_w, ms_ssim_w, vgg_w, device='cuda'):  # mse is L1
         # type: (float, float, float, str) -> None
         super().__init__()
 
-        self.loss_functions = [
-            nn.L1Loss(), piq.MultiScaleSSIMLoss(kernel_size=7), VGGLoss(device=device)
-        ]
+        self.mse = nn.L1Loss()
+        self.mse_w = mse_w
 
-        self.weights = [mse_w, ssim_w, vgg_w]  # vgg is always 0
+        self.ms_ssim = pytorch_msssim.MSSSIM(window_size=7)
+        self.ms_ssim_w = ms_ssim_w
+
+        self.vgg = VGGLoss()
+        self.vgg_w = vgg_w
+
+        self.weights = [self.mse_w, self.ms_ssim_w, self.vgg_w]
+
         assert sum(self.weights) != 0, 'at least one weight must be != than 0'
 
     def forward(self, y_pred, y_true):
         # type: (torch.Tensor, torch.Tensor) -> torch.Tensor
-        loss = None
-        for i in range(len(self.loss_functions)):
-            if self.weights[i] != 0:
-                loss_component = self.weights[i] * self.loss_functions[i](y_pred, y_true)
-                loss = (loss + loss_component) if (loss is not None) else loss_component
 
-        return loss
+        mse_l = 0 if self.mse_w == 0 else self.mse_w * self.mse(y_pred, y_true)
+        ms_ssim_l = 0 if self.ms_ssim_w == 0 else self.ms_ssim_w * (1 - self.ms_ssim(y_pred, y_true))
+        vgg_l = 0 if self.vgg_w == 0 else self.vgg_w * self.vgg(y_pred, y_true)
+
+        total = sum([mse_l, ms_ssim_l, vgg_l])
+
+        return total
 
 
 if __name__ == "__main__":

@@ -2,11 +2,28 @@ import numpy as np
 import random
 import torch
 from pathlib import Path
+from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-from utils.path_utils import png_to_numpy, get_files_in_dir_with_extension
-from utils.pytorch_utils import show_tensor
+
+def get_files_in_dir_with_extension(dir_path,
+                                    extension=(".png", ".jpg")):
+    """
+    """
+    if dir_path is None or not isinstance(dir_path, Path):
+        return
+    filenames = [x for x in dir_path.iterdir() if x.is_file()]
+    filenames = [x for x in filenames if (x.suffix in extension)]
+    return filenames
+
+
+def png_to_numpy(path):  # also jpg are ok
+    if path is None or not isinstance(path, Path):
+        return
+    img = Image.open(path)
+    numpy = np.array(img).copy()
+    return numpy
 
 
 class WoodCorrectionDataset(Dataset):
@@ -154,7 +171,7 @@ def main():
         border = torch.zeros(c, 2, w, device="cpu")
         cuts = torch.cat(tensors=[img[0], border], dim=1)
         cuts = torch.cat(tensors=[cuts, img[1]], dim=1)
-        show_tensor(cuts)
+        #show_tensor(cuts)
         pass
     print(count)
     pass
