@@ -4,7 +4,7 @@ filters: 16
 
 # LOSS
 mseWeight: 1
-msSsimWeight: 0
+msSsimWeight: 1
 vggWeight: 0
 
 # DATASET
@@ -13,7 +13,7 @@ cutSizeH: 128
 cutSizeW: 256
 maxShift: 15
 minShift: 0
-batchSize: 1
+batchSize: 2
 numWorkers: 4
 shuffle: true
 

@@ -47,10 +47,10 @@ lr, epochs = conf.get("lr"), conf.get("epochs")
 optimizer = Adam(model.parameters(), lr=lr)
 
 log_step_frequency, models_dir = conf.get("logStepFrequency"), conf.get("modelsDir")
-model_name = f"maxshift{max_shift}_minshift{min_shift}_mse{mse_w}_ssim{ms_ssim_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}.pth"
+model_name = f"multiresunet_maxshift{max_shift}_minshift{min_shift}_mse{mse_w}_ssim{ms_ssim_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}.pth"
 
 logDir = conf.get("logDir")
-log_name = f'log_{model_name}'
+log_name = model_name.replace(".pth", "")
 train_log_dir = os.path.join(logDir, log_name)
 if os.path.exists(train_log_dir):
     os.system(f"rm -rf {train_log_dir}")
