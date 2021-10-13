@@ -1,9 +1,9 @@
 from pathlib import Path
 import torch
 import os
-from unet.correction_dataset import WoodCorrectionDataset
-from unet.losses import WoodCorrectionLoss
-from unet.model.unet import UNet
+from correction_dataset import WoodCorrectionDataset
+from losses import WoodCorrectionLoss
+from model.unet import UNet
 from torch.optim.adam import Adam
 from torch.utils.data import DataLoader
 from utils.progress_bar import ProgressBar
@@ -47,7 +47,7 @@ lr, epochs = conf.get("lr"), conf.get("epochs")
 optimizer = Adam(model.parameters(), lr=lr)
 
 log_step_frequency, models_dir = conf.get("logStepFrequency"), conf.get("modelsDir")
-model_name = f"unet_maxshift{max_shift}_minshift{min_shift}_mse{mse_w}_ssim{ms_ssim_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}.pth"
+model_name = f"unet_maxshift{max_shift}_minshift{min_shift}_mse{mse_w}_ssim{ms_ssim_w}_vgg{vgg_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}.pth"
 
 logDir = conf.get("logDir")
 log_name = model_name.replace(".pth", "")
@@ -74,10 +74,14 @@ for epoch in range(epochs):
               f'│ Loss: {l:.15f} '
               , end='')
 
-        if global_step % log_step_frequency == 0:
-            summary_writer.add_images(tag="inputs", img_tensor=batch[0], global_step=global_step)
-            summary_writer.add_images(tag="targets", img_tensor=batch[1], global_step=global_step)
-            summary_writer.add_images(tag="outputs", img_tensor=predicted, global_step=global_step)
+        if global_step % log_step_frequency == 0:            
+            batch[0] = batch[0].to('cpu')
+            batch[1] = batch[1].to('cpu')
+            predicted = predicted.to('cpu')
+            
+            cat = torch.cat((batch[0], predicted), 2)
+            cat = torch.cat((cat, batch[1]), 2)
+            summary_writer.add_images(tag="results", img_tensor=cat, global_step=global_step)
             summary_writer.add_scalar(tag='train_loss', scalar_value=l, global_step=global_step)
 
         global_step = global_step + 1
