@@ -17,8 +17,14 @@ with open("../conf/default.yaml", "r") as file_stream:
         print("Unable to open configuration file. Aborting")
         exit()
 
-channels, filters = conf.get('channels'), conf.get('filters')
-model = UNet(n_channels=channels, ).to('cuda')
+replace_maxpool_with_stride = conf.get('replaceMaxpoolWithStride')
+channels = conf.get('channels')
+model = UNet(n_channels=channels, replace_maxpool_with_stride=replace_maxpool_with_stride).to('cuda')
+
+models_dir = conf.get("modelsDir")
+starting_model = conf.get("startingModel")
+if starting_model is not None:
+    model.load_state_dict(torch.load(os.path.join(models_dir, starting_model)))
 
 mse_w, ms_ssim_w, vgg_w = conf.get("mseWeight"), conf.get("msSsimWeight"), conf.get("vggWeight")
 loss = WoodCorrectionLoss(mse_w=mse_w, ms_ssim_w=ms_ssim_w, vgg_w=vgg_w)
@@ -46,8 +52,8 @@ dataset_iterator = iter(dataloader)
 lr, epochs = conf.get("lr"), conf.get("epochs")
 optimizer = Adam(model.parameters(), lr=lr)
 
-log_step_frequency, models_dir = conf.get("logStepFrequency"), conf.get("modelsDir")
-model_name = f"unet_maxshift{max_shift}_minshift{min_shift}_mse{mse_w}_ssim{ms_ssim_w}_vgg{vgg_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}.pth"
+log_step_frequency = conf.get("logStepFrequency") 
+model_name = f"unet_maxshift{max_shift}_minshift{min_shift}_mse{mse_w}_ssim{ms_ssim_w}_vgg{vgg_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}_replaceWithStride{replace_maxpool_with_stride}.pth"
 
 logDir = conf.get("logDir")
 log_name = model_name.replace(".pth", "")

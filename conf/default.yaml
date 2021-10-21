@@ -1,11 +1,14 @@
+
 # MODEL
 channels: 3
-filters: 16
+# uses stride instead of max-pooling to collapse data into the final feature map
+replaceMaxpoolWithStride: false
+startingModel: null # 'unet_maxshift15_minshift0_mse1_ssim3_vgg1_lr0.0002_batch8_epochs100_freq250_replaceWithStrideTrue.pth'
 
 # LOSS
 mseWeight: 1
-msSsimWeight: 1
-vggWeight: 0
+msSsimWeight: 3
+vggWeight: 1
 
 # DATASET
 trainDatasetPath: '../dataset/Legni02@resize_16x_TRAIN'
@@ -13,7 +16,7 @@ cutSizeH: 128
 cutSizeW: 256
 maxShift: 15
 minShift: 0
-batchSize: 2
+batchSize: 8
 numWorkers: 4
 shuffle: true
 
