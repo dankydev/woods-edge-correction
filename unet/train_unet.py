@@ -20,7 +20,8 @@ if __name__ == "__main__":
 
     replace_maxpool_with_stride = conf.get('replaceMaxpoolWithStride')
     channels = conf.get('channels')
-    model = UNet(n_channels=channels, replace_maxpool_with_stride=replace_maxpool_with_stride).to('cuda')
+    device = conf.get('device')
+    model = UNet(n_channels=channels, replace_maxpool_with_stride=replace_maxpool_with_stride, device=device).to(device)
 
     models_dir = conf.get("modelsDir")
     starting_model = conf.get("startingModel")
@@ -70,9 +71,9 @@ if __name__ == "__main__":
     for epoch in range(epochs):
         for step, batch in enumerate(dataloader):
             optimizer.zero_grad()
-            predicted = model(batch[0].to('cuda'))
+            predicted = model(batch[0].to(device))
 
-            l, vgg_h, ms_ssim, vgg_l = loss(predicted, batch[1].to('cuda'))
+            l, vgg_h, ms_ssim, vgg_l = loss(predicted, batch[1].to(device))
             l.backward()
             optimizer.step()
 

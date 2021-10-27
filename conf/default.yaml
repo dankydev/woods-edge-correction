@@ -2,6 +2,7 @@
 channels: 3
 replaceMaxpoolWithStride: false # uses stride instead of max-pooling to collapse data into the final feature map
 startingModel: null # 'unet_maxshift15_minshift0_mse1_ssim3_vgg1_lr0.0002_batch8_epochs100_freq250_replaceWithStrideTrue.pth'
+device: 'cuda:0'
 
 # LOSS
 vggHighWeight: 7
