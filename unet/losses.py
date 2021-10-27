@@ -60,33 +60,38 @@ class VGGLoss(_Loss):
 
 class WoodCorrectionLoss(_Loss):
 
-    def __init__(self, mse_w, ms_ssim_w, vgg_w, device='cuda'):  # mse is L1
-        # type: (float, float, float, str) -> None
+    def __init__(self, vgg_high_w, ms_ssim_w, vgg_low_w, verbose=False, device='cuda'):
+        # type: (float, float, float, bool, str) -> None
         super().__init__()
-
-        self.mse = nn.L1Loss()
-        self.mse_w = mse_w
 
         self.ms_ssim = pytorch_msssim.MSSSIM(window_size=7)
         self.ms_ssim_w = ms_ssim_w
 
-        self.vgg = VGGLoss()
-        self.vgg_w = vgg_w
+        self.vgg_low = VGGLoss(conv_index='2_2')
+        self.vgg_low_w = vgg_low_w
 
-        self.weights = [self.mse_w, self.ms_ssim_w, self.vgg_w]
+        self.vgg_high = VGGLoss(conv_index='5_4')
+        self.vgg_high_w = vgg_high_w
+
+        self.weights = [self.ms_ssim_w, self.vgg_low_w, self.vgg_high_w]
+
+        self.verbose = verbose
 
         assert sum(self.weights) != 0, 'at least one weight must be != than 0'
 
     def forward(self, y_pred, y_true):
-        # type: (torch.Tensor, torch.Tensor) -> torch.Tensor
+        # type: (torch.Tensor, torch.Tensor) -> tuple
 
-        mse_l = 0 if self.mse_w == 0 else self.mse_w * self.mse(y_pred, y_true)
+        vgg_high_l = 0 if self.vgg_high_w == 0 else self.vgg_high_w * self.vgg_high(y_pred, y_true)
         ms_ssim_l = 0 if self.ms_ssim_w == 0 else self.ms_ssim_w * (1 - self.ms_ssim(y_pred, y_true))
-        vgg_l = 0 if self.vgg_w == 0 else self.vgg_w * self.vgg(y_pred, y_true)
+        vgg_low_l = 0 if self.vgg_low_w == 0 else self.vgg_low_w * self.vgg_low(y_pred, y_true)
 
-        total = sum([mse_l, ms_ssim_l, vgg_l])
+        total = sum([vgg_high_l, ms_ssim_l, vgg_low_l])
 
-        return total
+        if self.verbose:
+            print(f"vgg_high: {float(vgg_high_l)}, vgg_low: {float(vgg_low_l)}, mssim: {float(ms_ssim_l)}")
+
+        return total, vgg_high_l, ms_ssim_l, vgg_low_l
 
 
 if __name__ == "__main__":
@@ -98,7 +103,7 @@ if __name__ == "__main__":
         test_mode=False
     )
 
-    loss = WoodCorrectionLoss(mse_w=8, ssim_w=13, vgg_w=0)
+    loss = WoodCorrectionLoss(vgg_high_w=7, ms_ssim_w=9, vgg_low_w=1, verbose=True)
 
     from torch.utils.data import DataLoader
 
@@ -110,10 +115,8 @@ if __name__ == "__main__":
         drop_last=True
     )
 
-
     for couple in dl:
         misaligned = couple[0][0]
         aligned = couple[1][0]
 
-        my_loss = loss.forward(misaligned, aligned)
-        print(f"Loss evaluated: {my_loss:.2f}")
+        my_loss = loss.forward(torch.unsqueeze(misaligned, dim=0), torch.unsqueeze(aligned, dim=0))

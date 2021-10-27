@@ -38,5 +38,5 @@ class UNet(nn.Module):
 
 if __name__ == "__main__":
     unet = UNet(n_channels=3, out_channels=3, replace_maxpool_with_stride=True)
-    out = unet(torch.ones(1, 3, 128, 256))
+    out = unet(torch.ones(5, 3, 128, 256))
     print(out.size())
