@@ -1,13 +1,13 @@
 # MODEL
 channels: 3
-replaceMaxpoolWithStride: false # uses stride instead of max-pooling to collapse data into the final feature map
+replaceMaxpoolWithStride: true # uses stride instead of max-pooling to collapse data into the final feature map
 startingModel: null # 'unet_maxshift15_minshift0_mse1_ssim3_vgg1_lr0.0002_batch8_epochs100_freq250_replaceWithStrideTrue.pth'
-device: 'cuda:0'
+device: 'cuda:1'
 
 # LOSS
-vggHighWeight: 7
+vggHighWeight: 5
 vggLowWeight: 1
-msSsimWeight: 9
+msSsimWeight: 7
 
 
 # DATASET
@@ -16,7 +16,7 @@ cutSizeH: 128
 cutSizeW: 256
 maxShift: 15
 minShift: 0
-batchSize: 1
+batchSize: 8
 numWorkers: 4
 shuffle: true
 
@@ -24,5 +24,5 @@ shuffle: true
 lr: 0.0002
 epochs: 100
 logDir: '../logs/'
-logStepFrequency: 250
+logStepFrequency: 100
 modelsDir: '../models/'

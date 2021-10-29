@@ -8,17 +8,18 @@ import torchvision
 from torch import nn
 from torch.nn.modules.loss import _Loss
 import pytorch_msssim
-from multiresunet.correction_dataset import WoodCorrectionDataset
+from correction_dataset import WoodCorrectionDataset
 
 
 class MeanShift(nn.Conv2d):
 
-    def __init__(self, rgb_range, rgb_mean=(0.4488, 0.4371, 0.4040), rgb_std=(1.0, 1.0, 1.0), sign=-1):
+    def __init__(self, rgb_range, rgb_mean=(0.4488, 0.4371, 0.4040), rgb_std=(1.0, 1.0, 1.0), sign=-1, device='cuda'):
         super(MeanShift, self).__init__(3, 3, kernel_size=1)
-        std = torch.tensor(rgb_std)
-        self.weight.data = torch.eye(3).view(3, 3, 1, 1) / std.view(3, 1, 1, 1)
-        self.bias.data = sign * rgb_range * torch.tensor(rgb_mean) / std
+        std = torch.tensor(rgb_std).to(device)
+        self.weight.data = torch.eye(3).view(3, 3, 1, 1).to(device) / std.view(3, 1, 1, 1)
+        self.bias.data = sign * rgb_range * torch.tensor(rgb_mean).to(device) / std
         self.requires_grad = False
+        self.device = device
 
 
 class VGGLoss(_Loss):
@@ -34,12 +35,11 @@ class VGGLoss(_Loss):
 
         vgg_mean = (0.485, 0.456, 0.406)
         vgg_std = (0.229 * rgb_range, 0.224 * rgb_range, 0.225 * rgb_range)
-        self.mean_shift = MeanShift(rgb_range, vgg_mean, vgg_std)
+        self.mean_shift = MeanShift(rgb_range, vgg_mean, vgg_std, device=device)
         self.vgg = self.vgg.to(device)
-        self.mean_shift.to(device)
+        self.mean_shift = self.mean_shift.to(device)
 
     def get_vgg_features(self, x):
-        x = x.to('cuda')
         x = self.mean_shift(x)
         x = self.vgg(x)
         return x
@@ -60,17 +60,17 @@ class VGGLoss(_Loss):
 
 class WoodCorrectionLoss(_Loss):
 
-    def __init__(self, vgg_high_w, ms_ssim_w, vgg_low_w, verbose=False, device='cuda'):
+    def __init__(self, vgg_high_w, ms_ssim_w, vgg_low_w, device, verbose=False):
         # type: (float, float, float, bool, str) -> None
         super().__init__()
 
-        self.ms_ssim = pytorch_msssim.MSSSIM(window_size=7)
+        self.ms_ssim = pytorch_msssim.MSSSIM(window_size=7).to(device)
         self.ms_ssim_w = ms_ssim_w
 
-        self.vgg_low = VGGLoss(conv_index='2_2')
+        self.vgg_low = VGGLoss(conv_index='2_2', device=device).to(device)
         self.vgg_low_w = vgg_low_w
 
-        self.vgg_high = VGGLoss(conv_index='5_4')
+        self.vgg_high = VGGLoss(conv_index='5_4', device=device).to(device)
         self.vgg_high_w = vgg_high_w
 
         self.weights = [self.ms_ssim_w, self.vgg_low_w, self.vgg_high_w]

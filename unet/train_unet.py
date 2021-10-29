@@ -21,6 +21,7 @@ if __name__ == "__main__":
     replace_maxpool_with_stride = conf.get('replaceMaxpoolWithStride')
     channels = conf.get('channels')
     device = conf.get('device')
+    print(device)
     model = UNet(n_channels=channels, replace_maxpool_with_stride=replace_maxpool_with_stride, device=device).to(device)
 
     models_dir = conf.get("modelsDir")
@@ -29,7 +30,7 @@ if __name__ == "__main__":
         model.load_state_dict(torch.load(os.path.join(models_dir, starting_model)))
 
     vgg_high_w, ms_ssim_w, vgg_low_w = conf.get("vggHighWeight"), conf.get("msSsimWeight"), conf.get("vggLowWeight")
-    loss = WoodCorrectionLoss(vgg_high_w=vgg_high_w, ms_ssim_w=ms_ssim_w, vgg_low_w=vgg_low_w)
+    loss = WoodCorrectionLoss(vgg_high_w=vgg_high_w, ms_ssim_w=ms_ssim_w, vgg_low_w=vgg_low_w, device=device).to(device)
 
     dataset_path, cut_h, cut_w = conf.get("trainDatasetPath"), conf.get("cutSizeH"), conf.get("cutSizeW")
     max_shift, min_shift = conf.get("maxShift"), conf.get("minShift")
@@ -72,6 +73,7 @@ if __name__ == "__main__":
         for step, batch in enumerate(dataloader):
             optimizer.zero_grad()
             predicted = model(batch[0].to(device))
+            predicted = predicted.to(device)
 
             l, vgg_h, ms_ssim, vgg_l = loss(predicted, batch[1].to(device))
             l.backward()
@@ -79,7 +81,7 @@ if __name__ == "__main__":
 
             progress_bar.inc()
             print(f'\r{progress_bar} '
-                  f'│ Loss: {l:.15f} '
+                  f'│ Loss: {l:.2f} '
                   , end='')
 
             if global_step % log_step_frequency == 0:
