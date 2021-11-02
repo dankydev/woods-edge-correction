@@ -9,6 +9,7 @@ if __name__ == "__main__":
     from torch.utils.data import DataLoader
     from utils.progress_bar import ProgressBar
     from torch.utils.tensorboard import SummaryWriter
+    from datetime import datetime
     import yaml
 
     with open("../conf/train.yaml", "r") as file_stream:
@@ -55,13 +56,13 @@ if __name__ == "__main__":
     optimizer = Adam(model.parameters(), lr=lr)
 
     log_step_frequency = conf.get("logStepFrequency")
-    model_name = f"unet_maxshift{max_shift}_minshift{min_shift}_vgglow{vgg_low_w}_msssim{ms_ssim_w}_vgghigh{vgg_high_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}_replaceWithStride{replace_maxpool_with_stride}.pth"
+    current_datetime = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
+    exp_name = conf.get("expName")
+    model_name = f"{current_datetime}_{exp_name}_unet_maxshift{max_shift}_minshift{min_shift}_vgglow{vgg_low_w}_msssim{ms_ssim_w}_vgghigh{vgg_high_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}_replaceWithStride{replace_maxpool_with_stride}.pth"
 
     logDir = conf.get("logDir")
     log_name = model_name.replace(".pth", "")
     train_log_dir = os.path.join(logDir, log_name)
-    if os.path.exists(train_log_dir):
-        os.system(f"rm -rf {train_log_dir}")
     os.mkdir(train_log_dir)
     summary_writer = SummaryWriter(train_log_dir)
 
