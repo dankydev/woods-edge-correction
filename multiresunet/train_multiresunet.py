@@ -10,7 +10,7 @@ from utils.progress_bar import ProgressBar
 from torch.utils.tensorboard import SummaryWriter
 import yaml
 
-with open("../conf/default.yaml", "r") as file_stream:
+with open("../conf/train.yaml", "r") as file_stream:
     try:
         conf = yaml.safe_load(file_stream)
     except yaml.YAMLError:
