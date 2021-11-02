@@ -11,7 +11,7 @@ if __name__ == "__main__":
     from torch.utils.tensorboard import SummaryWriter
     import yaml
 
-    with open("../conf/default.yaml", "r") as file_stream:
+    with open("../conf/train.yaml", "r") as file_stream:
         try:
             conf = yaml.safe_load(file_stream)
         except yaml.YAMLError:
@@ -21,7 +21,6 @@ if __name__ == "__main__":
     replace_maxpool_with_stride = conf.get('replaceMaxpoolWithStride')
     channels = conf.get('channels')
     device = conf.get('device')
-    print(device)
     model = UNet(n_channels=channels, replace_maxpool_with_stride=replace_maxpool_with_stride, device=device).to(device)
 
     models_dir = conf.get("modelsDir")
