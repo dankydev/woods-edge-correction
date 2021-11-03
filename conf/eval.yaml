@@ -1,0 +1,15 @@
+# MODEL
+channels: 3
+replaceMaxpoolWithStride: false # uses stride instead of max-pooling to collapse data into the final feature map
+modelsDir: '../models/'
+device: 'cuda:0'
+evalModel: 'unet_maxshift15_minshift0_vgglow1_msssim7_vgghigh5_lr0.0002_batch8_epochs100_freq100_replaceWithStrideFalse.pth'
+showResults: true
+
+# DATASET
+evalDatasetPath: '../dataset/Legni02@resize_16x_TEST'
+cutSizeH: 128
+cutSizeW: 256
+maxShift: 15
+minShift: 0
+samples: 4 # null to get the whole dataset

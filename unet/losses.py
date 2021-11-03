@@ -61,16 +61,16 @@ class VGGLoss(_Loss):
 class WoodCorrectionLoss(_Loss):
 
     def __init__(self, vgg_high_w, ms_ssim_w, vgg_low_w, device, verbose=False):
-        # type: (float, float, float, bool, str) -> None
+        # type: (float, float, float, str, bool) -> None
         super().__init__()
 
-        self.ms_ssim = pytorch_msssim.MSSSIM(window_size=7).to(device)
+        self.ms_ssim = piq.MultiScaleSSIMLoss(kernel_size=7, data_range=255).to(device)
         self.ms_ssim_w = ms_ssim_w
 
-        self.vgg_low = VGGLoss(conv_index='2_2', device=device).to(device)
+        self.vgg_low = piq.ContentLoss(layers=["relu2_2"], replace_pooling=True).to(device) # VGGLoss(conv_index='2_2', device=device).to(device)
         self.vgg_low_w = vgg_low_w
 
-        self.vgg_high = VGGLoss(conv_index='5_4', device=device).to(device)
+        self.vgg_high = piq.ContentLoss(layers=["relu5_1"], replace_pooling=True).to(device) # VGGLoss(conv_index='5_4', device=device).to(device)
         self.vgg_high_w = vgg_high_w
 
         self.weights = [self.ms_ssim_w, self.vgg_low_w, self.vgg_high_w]
@@ -83,7 +83,7 @@ class WoodCorrectionLoss(_Loss):
         # type: (torch.Tensor, torch.Tensor) -> tuple
 
         vgg_high_l = 0 if self.vgg_high_w == 0 else self.vgg_high_w * self.vgg_high(y_pred, y_true)
-        ms_ssim_l = 0 if self.ms_ssim_w == 0 else self.ms_ssim_w * (1 - self.ms_ssim(y_pred, y_true))
+        ms_ssim_l = 0 if self.ms_ssim_w == 0 else self.ms_ssim_w * self.ms_ssim(y_pred, y_true)
         vgg_low_l = 0 if self.vgg_low_w == 0 else self.vgg_low_w * self.vgg_low(y_pred, y_true)
 
         total = sum([vgg_high_l, ms_ssim_l, vgg_low_l])
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         test_mode=False
     )
 
-    loss = WoodCorrectionLoss(vgg_high_w=7, ms_ssim_w=9, vgg_low_w=1, verbose=True)
+    loss = WoodCorrectionLoss(vgg_high_w=7, ms_ssim_w=9, vgg_low_w=1, verbose=True, device='cuda')
 
     from torch.utils.data import DataLoader
 
