@@ -6,9 +6,11 @@ device: 'cuda:0'
 expName: 'prova'
 
 # LOSS
-vggHighWeight: 5
-vggLowWeight: 1
-msSsimWeight: 10
+mseWeight: 0
+vggHighWeight: 0
+vggLowWeight: 0
+msSsimWeight: 0
+distsWeight: 1
 
 # DATASET
 trainDatasetPath: '../dataset/Legni02@resize_16x_TRAIN'
@@ -24,5 +26,5 @@ shuffle: true
 lr: 0.0002
 epochs: 100
 logDir: '../logs/'
-logStepFrequency: 100
+logStepFrequency: 10
 startingModel: null # 'unet_maxshift15_minshift0_mse1_ssim3_vgg1_lr0.0002_batch8_epochs100_freq250_replaceWithStrideTrue.pth'
