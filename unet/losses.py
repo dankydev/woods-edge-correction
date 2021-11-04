@@ -11,8 +11,8 @@ from correction_dataset import WoodCorrectionDataset
 
 class WoodCorrectionLoss(_Loss):
 
-    def __init__(self, mse_w, vgg_high_w, ms_ssim_w, vgg_low_w, dists_w, device, verbose=False):
-        # type: (float, float, float, float, float, str, bool) -> None
+    def __init__(self, mse_w, vgg_high_w, ms_ssim_w, vgg_low_w, dists_w, dss_w, device, verbose=False):
+        # type: (float, float, float, float, float, float, str, bool) -> None
         super().__init__()
 
         self.mse = nn.MSELoss()
@@ -30,7 +30,10 @@ class WoodCorrectionLoss(_Loss):
         self.dists = piq.DISTS().to(device)
         self.dists_w = dists_w
 
-        self.weights = [self.mse_w, self.ms_ssim_w, self.vgg_low_w, self.vgg_high_w, self.dists_w]
+        self.dss = piq.DSSLoss().to(device)
+        self.dss_w = dss_w
+
+        self.weights = [self.mse_w, self.ms_ssim_w, self.vgg_low_w, self.vgg_high_w, self.dists_w, self.dss_w]
 
         self.verbose = verbose
 
@@ -44,13 +47,14 @@ class WoodCorrectionLoss(_Loss):
         ms_ssim_l = 0 if self.ms_ssim_w == 0 else self.ms_ssim_w * self.ms_ssim(y_pred, y_true)
         vgg_low_l = 0 if self.vgg_low_w == 0 else self.vgg_low_w * self.vgg_low(y_pred, y_true)
         dists_l = 0 if self.dists_w == 0 else self.dists_w * self.dists(y_pred, y_true)
+        dss_l = 0 if self.dss_w == 0 else self.dss_w * self.dss(y_pred, y_true)
 
-        total = sum([mse_l, vgg_high_l, ms_ssim_l, vgg_low_l, dists_l])
+        total = sum([mse_l, vgg_high_l, ms_ssim_l, vgg_low_l, dists_l, dss_l])
 
         if self.verbose:
-            print(f"mse: {float(mse_l)}, vgg_high: {float(vgg_high_l)}, vgg_low: {float(vgg_low_l)}, mssim: {float(ms_ssim_l)}, dists: {float(dists_l)}")
+            print(f"mse: {float(mse_l)}, vgg_high: {float(vgg_high_l)}, vgg_low: {float(vgg_low_l)}, mssim: {float(ms_ssim_l)}, dists: {float(dists_l)}, dss: {float(dss_l)}")
 
-        return total, mse_l, vgg_high_l, ms_ssim_l, vgg_low_l, dists_l
+        return total, mse_l, vgg_high_l, ms_ssim_l, vgg_low_l, dists_l, dss_l
 
 
 if __name__ == "__main__":
@@ -62,7 +66,7 @@ if __name__ == "__main__":
         test_mode=False
     )
 
-    loss = WoodCorrectionLoss(mse_w=0, vgg_high_w=0, ms_ssim_w=1, vgg_low_w=0, dists_w=1, verbose=True, device='cuda')
+    loss = WoodCorrectionLoss(mse_w=1, vgg_high_w=0, ms_ssim_w=2, vgg_low_w=0, dists_w=0, dss_w=1, verbose=True, device='cuda')
 
     from torch.utils.data import DataLoader
 
