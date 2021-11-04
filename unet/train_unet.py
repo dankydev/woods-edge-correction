@@ -58,7 +58,7 @@ if __name__ == "__main__":
     log_step_frequency = conf.get("logStepFrequency")
     current_datetime = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
     exp_name = conf.get("expName")
-    model_name = f"{current_datetime}_{exp_name}_unet_maxshift{max_shift}_minshift{min_shift}_mse{mse_w}_vgglow{vgg_low_w}_msssim{ms_ssim_w}_vgghigh{vgg_high_w}_dists{dists_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}_replaceWithStride{replace_maxpool_with_stride}.pth"
+    model_name = f"{current_datetime}_{exp_name}_unet_maxshift{max_shift}_minshift{min_shift}_mse{mse_w}_vgglow{vgg_low_w}_msssim{ms_ssim_w}_vgghigh{vgg_high_w}_dists{dists_w}_dss{dss_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}_replaceWithStride{replace_maxpool_with_stride}.pth"
 
     logDir = conf.get("logDir")
     log_name = model_name.replace(".pth", "")
