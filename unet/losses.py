@@ -66,7 +66,7 @@ if __name__ == "__main__":
         test_mode=False
     )
 
-    loss = WoodCorrectionLoss(mse_w=1, vgg_high_w=0, ms_ssim_w=2, vgg_low_w=0, dists_w=0, dss_w=1, verbose=True, device='cuda')
+    loss = WoodCorrectionLoss(mse_w=0, vgg_high_w=1, ms_ssim_w=0, vgg_low_w=1, dists_w=0, dss_w=0, verbose=True, device='cuda')
 
     from torch.utils.data import DataLoader
 
