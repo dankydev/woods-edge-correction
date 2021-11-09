@@ -21,10 +21,10 @@ class WoodCorrectionLoss(_Loss):
         self.ms_ssim = piq.MultiScaleSSIMLoss(kernel_size=7, data_range=255).to(device)
         self.ms_ssim_w = ms_ssim_w
 
-        self.vgg_low = piq.ContentLoss(layers=["relu2_2"], replace_pooling=True).to(device)
+        self.vgg_low = piq.ContentLoss(layers=["relu2_2"], replace_pooling=True, normalize_features=True).to(device)
         self.vgg_low_w = vgg_low_w
 
-        self.vgg_high = piq.ContentLoss(layers=["relu5_1"], replace_pooling=True).to(device)
+        self.vgg_high = piq.ContentLoss(layers=["relu5_1"], replace_pooling=True, normalize_features=True).to(device)
         self.vgg_high_w = vgg_high_w
 
         self.dists = piq.DISTS().to(device)
