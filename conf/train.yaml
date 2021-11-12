@@ -9,9 +9,10 @@ expName: 'prova'
 mseWeight: 0
 vggHighWeight: 0
 vggLowWeight: 0
-msSsimWeight: 2
+msSsimWeight: 0
 distsWeight: 0
-dssWeight: 2
+dssWeight: 1
+fsimWeight: 0
 
 # DATASET
 trainDatasetPath: '../dataset/Legni02@resize_16x_TRAIN'

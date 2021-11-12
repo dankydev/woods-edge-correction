@@ -29,8 +29,8 @@ if __name__ == "__main__":
     if starting_model is not None:
         model.load_state_dict(torch.load(os.path.join(models_dir, starting_model)))
 
-    mse_w, vgg_high_w, ms_ssim_w, vgg_low_w, dists_w, dss_w = conf.get("mseWeight"), conf.get("vggHighWeight"), conf.get("msSsimWeight"), conf.get("vggLowWeight"), conf.get("distsWeight"), conf.get("dssWeight")
-    loss = WoodCorrectionLoss(mse_w=mse_w, vgg_high_w=vgg_high_w, ms_ssim_w=ms_ssim_w, vgg_low_w=vgg_low_w, dists_w=dists_w, dss_w=dss_w, device=device).to(device)
+    mse_w, vgg_high_w, ms_ssim_w, vgg_low_w, dists_w, dss_w, fsim_w = conf.get("mseWeight"), conf.get("vggHighWeight"), conf.get("msSsimWeight"), conf.get("vggLowWeight"), conf.get("distsWeight"), conf.get("dssWeight"), conf.get("fsimWeight")
+    loss = WoodCorrectionLoss(mse_w=mse_w, vgg_high_w=vgg_high_w, ms_ssim_w=ms_ssim_w, vgg_low_w=vgg_low_w, dists_w=dists_w, dss_w=dss_w, device=device, fsim_w=fsim_w).to(device)
 
     dataset_path, cut_h, cut_w = conf.get("trainDatasetPath"), conf.get("cutSizeH"), conf.get("cutSizeW")
     max_shift, min_shift = conf.get("maxShift"), conf.get("minShift")
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     log_step_frequency = conf.get("logStepFrequency")
     current_datetime = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
     exp_name = conf.get("expName")
-    model_name = f"{current_datetime}_{exp_name}_unet_maxshift{max_shift}_minshift{min_shift}_mse{mse_w}_vgglow{vgg_low_w}_msssim{ms_ssim_w}_vgghigh{vgg_high_w}_dists{dists_w}_dss{dss_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}_replaceWithStride{replace_maxpool_with_stride}.pth"
+    model_name = f"{current_datetime}_{exp_name}_unet_maxshift{max_shift}_minshift{min_shift}_mse{mse_w}_vgglow{vgg_low_w}_msssim{ms_ssim_w}_vgghigh{vgg_high_w}_dists{dists_w}_dss{dss_w}_fsim{fsim_w}_lr{lr}_batch{batch_size}_epochs{epochs}_freq{log_step_frequency}_replaceWithStride{replace_maxpool_with_stride}.pth"
 
     logDir = conf.get("logDir")
     log_name = model_name.replace(".pth", "")
@@ -75,7 +75,7 @@ if __name__ == "__main__":
             predicted = model(batch[0].to(device))
             predicted = predicted.to(device)
 
-            l, mse_l, vgg_h, ms_ssim, vgg_l, dists_l, dss_l = loss(predicted, batch[1].to(device))
+            l, mse_l, vgg_h, ms_ssim, vgg_l, dists_l, dss_l, fsim_l = loss(predicted, batch[1].to(device))
             l.backward()
             optimizer.step()
 
@@ -106,6 +106,8 @@ if __name__ == "__main__":
                     summary_writer.add_scalar(tag='DISTS loss', scalar_value=dists_l, global_step=global_step)
                 if dss_w > 0:
                     summary_writer.add_scalar(tag='DSS loss', scalar_value=dss_l, global_step=global_step)
+                if fsim_w > 0:
+                    summary_writer.add_scalar(tag='FSIM loss', scalar_value=fsim_l, global_step=global_step)
 
             global_step = global_step + 1
 
