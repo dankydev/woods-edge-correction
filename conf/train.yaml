@@ -7,8 +7,8 @@ expName: 'prova'
 
 # LOSS
 mseWeight: 0
-vggHighWeight: 0
-vggLowWeight: 0
+vggHighWeight: 1
+vggLowWeight: 1
 msSsimWeight: 0
 distsWeight: 0
 dssWeight: 1

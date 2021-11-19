@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 from torch.nn.modules.loss import _Loss
 from correction_dataset import WoodCorrectionDataset
+import torchvision.transforms as T
 
 
 class WoodCorrectionLoss(_Loss):
