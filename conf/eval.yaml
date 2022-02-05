@@ -1,9 +1,9 @@
 # MODEL
 channels: 3
-replaceMaxpoolWithStride: false # uses stride instead of max-pooling to collapse data into the final feature map
+replaceMaxpoolWithStride: true # uses stride instead of max-pooling to collapse data into the final feature map
 modelsDir: '../models/'
 device: 'cuda:0'
-evalModel: 'unet_maxshift15_minshift0_vgglow1_msssim7_vgghigh5_lr0.0002_batch8_epochs100_freq100_replaceWithStrideFalse.pth'
+evalModel: '2021-11-12-01-54-50_vgg_dss_unet_maxshift15_minshift0_mse0_vgglow1_msssim0_vgghigh1_dists0_dss1_fsim0_lr0.0002_batch8_epochs100_freq100_replaceWithStrideTrue.pth'
 showResults: true
 
 # DATASET
@@ -12,4 +12,4 @@ cutSizeH: 128
 cutSizeW: 256
 maxShift: 15
 minShift: 0
-samples: 4 # null to get the whole dataset
+samples: 6 # null to get the whole dataset

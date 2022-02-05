@@ -66,13 +66,13 @@ if __name__ == "__main__":
     mse = torch.nn.MSELoss()(predictions, aligned)
     brisque = piq.brisque(predictions)
     dss = piq.dss(predictions, aligned)
-    dists = piq.DISTS()(predictions, aligned)
+    # dists = piq.DISTS()(predictions, aligned)
 
     print(f"PSNR:\t\t{psnr} dB")
     print(f"SSIM:\t\t{ssim}")
     print(f"MSE:\t\t{mse}")
     print(f"BRISQUE:\t{brisque}")
-    print(f"DISTS:\t\t{dists}")
+    # print(f"DISTS:\t\t{dists}")
 
     show_results = conf.get("showResults")
 
