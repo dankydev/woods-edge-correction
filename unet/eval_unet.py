@@ -72,6 +72,7 @@ if __name__ == "__main__":
     print(f"SSIM:\t\t{ssim}")
     print(f"MSE:\t\t{mse}")
     print(f"BRISQUE:\t{brisque}")
+    print(f"DSS: \t\t{dss}")
     # print(f"DISTS:\t\t{dists}")
 
     show_results = conf.get("showResults")

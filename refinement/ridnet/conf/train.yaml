@@ -1,0 +1,26 @@
+# MODEL
+modelsDir: 'models/'
+device: 'cuda:0'
+expName: 'old_loss'
+
+# DATASET
+trainDatasetPath: '../../dataset/refinement/output/train/wood'
+batchSize: 4
+numWorkers: 4
+shuffle: true
+
+# LOSS
+mseWeight: 1
+vggHighWeight: 1
+vggLowWeight: 1
+msSsimWeight: 0
+distsWeight: 0
+dssWeight: 0
+fsimWeight: 0
+
+# TRAINING
+lr: 0.0002
+epochs: 100
+logDir: 'logs/'
+logStepFrequency: 10
+startingModel: null

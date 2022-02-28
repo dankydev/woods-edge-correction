@@ -35,9 +35,9 @@ class UNet(nn.Module):
         x = self.up4(x, x1)
         logits = self.outc(x)
         return logits
-
+torch.ones(5, 3, 128, 256, device='cuda:0')
 
 if __name__ == "__main__":
     unet = UNet(n_channels=3, out_channels=3, replace_maxpool_with_stride=True, device='cuda:0')
-    out = unet(torch.ones(5, 3, 128, 256, device='cuda:0'))
+    out = unet()
     print(out.size())

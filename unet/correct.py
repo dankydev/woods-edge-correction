@@ -4,9 +4,9 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from PIL import Image
     import torchvision.transforms.functional as TF
+    from torchvision.utils import save_image
     import yaml
     from unet.model.unet import UNet
-
 
     def show_tensor_image(image: torch.Tensor):
         plt.figure()
@@ -47,9 +47,10 @@ if __name__ == "__main__":
         width_portions = image.size()[-1] // portion_size
         if verbose:
             show_tensor_image(image)
+            save_image(image, 'input.png')
         result_image = None
 
-        # first pass (even pos)
+        # first even pass
         for p in range(0, width_portions, 2):
             portion_to_correct = image[:, :, p * portion_size:(p + 2) * portion_size]
             portion_corrected = model(torch.unsqueeze(portion_to_correct, 0))[0]
@@ -60,8 +61,9 @@ if __name__ == "__main__":
 
         if verbose:
             show_tensor_image(result_image)
+            save_image(result_image, 'even1.png')
 
-        # second pass (odd pos)
+        # first odd pass
         for p in range(1, width_portions - 1, 2):
             portion_to_correct = result_image[:, :, p * portion_size:(p + 2) * portion_size]
             portion_corrected = model(torch.unsqueeze(portion_to_correct, 0))[0]
@@ -69,6 +71,29 @@ if __name__ == "__main__":
 
         if verbose:
             show_tensor_image(result_image)
+            save_image(result_image, 'odd1.png')
+
+        # second even pass (skip first)
+        for p in range(2, width_portions, 2):
+            portion_to_correct = result_image[:, :, p * portion_size:(p + 2) * portion_size]
+            portion_corrected = model(torch.unsqueeze(portion_to_correct, 0))[0]
+            result_image[:, :, (p + 1) * portion_size:(p + 2) * portion_size] = portion_corrected[:, :, portion_size:portion_size*2]
+
+        if verbose:
+            show_tensor_image(result_image)
+            save_image(result_image, 'even2.png')
+
+        # second odd pass (skip first)
+        for p in range(3, width_portions - 1, 2):
+            portion_to_correct = result_image[:, :, p * portion_size:(p + 2) * portion_size]
+            portion_corrected = model(torch.unsqueeze(portion_to_correct, 0))[0]
+            result_image[:, :, (p + 1) * portion_size:(p + 2) * portion_size] = portion_corrected[:, :, portion_size:portion_size*2]
+
+        if verbose:
+            show_tensor_image(result_image)
+            save_image(result_image, 'odd2.png')
+
+        exit()
 
         return result_image
 
@@ -106,7 +131,7 @@ if __name__ == "__main__":
             current_image = current_image.to('cpu')
 
             show_tensor_image(current_image)
-            corrected_image = correct_image(current_image, verbose=False, portion_size=portion_size)
+            corrected_image = correct_image_double_pass(current_image, verbose=True, portion_size=portion_size)
             show_tensor_image(corrected_image)
 
 

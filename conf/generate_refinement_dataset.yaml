@@ -1,0 +1,15 @@
+# MODEL
+channels: 3
+replaceMaxpoolWithStride: true # uses stride instead of max-pooling to collapse data into the final feature map
+modelsDir: '../models/'
+testModel: '2021-11-12-01-54-50_vgg_dss_unet_maxshift15_minshift0_mse0_vgglow1_msssim0_vgghigh1_dists0_dss1_fsim0_lr0.0002_batch8_epochs100_freq100_replaceWithStrideTrue.pth'
+device: 'cuda:0'
+
+# DATASET
+finalDatasetTotalImages: null
+originalDatasetPath: '../dataset/Legni02@resize_16x_TRAIN'
+datasetSavePath : '../dataset/refinement'
+cutSizeH: 128
+cutSizeW: 256
+maxShift: 15
+minShift: 0
