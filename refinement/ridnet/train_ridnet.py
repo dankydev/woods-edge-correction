@@ -35,7 +35,7 @@ if __name__ == "__main__":
                               dists_w=dists_w, dss_w=dss_w, device=device, fsim_w=fsim_w).to(device)
 
     dataset_path = conf.get("trainDatasetPath")
-    dataset = RefinementDataset(dataset_path=Path("C:\\Users\\manic\\Documents\\woods-edge-correction\\dataset\\refinement\\output\\train\\wood"))
+    dataset = RefinementDataset(dataset_path=Path(dataset_path))
 
     batch_size, num_workers, shuffle = conf.get("batchSize"), conf.get("numWorkers"), conf.get("shuffle")
     dataloader = DataLoader(

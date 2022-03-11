@@ -1,11 +1,11 @@
 # MODEL
 modelsDir: 'models/'
 device: 'cuda:0'
-expName: 'old_loss'
+expName: 'mse_vgg'
 
 # DATASET
-trainDatasetPath: '../../dataset/refinement/output/train/wood'
-batchSize: 4
+trainDatasetPath: '/nas/softechict-nas-3/dmanicardi/woods-edge-correction/refinement_dataset/output/train/wood/'
+batchSize: 8
 numWorkers: 4
 shuffle: true
 
