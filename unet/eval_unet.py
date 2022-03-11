@@ -1,10 +1,12 @@
+import datetime
+
 if __name__ == "__main__":
     import os
     import piq
     import torch
     import matplotlib.pyplot as plt
     import torchvision
-
+    from datetime import datetime
     from pathlib import Path
 
     from torch.utils.data import DataLoader
@@ -45,6 +47,7 @@ if __name__ == "__main__":
     iterator = iter(data_loader)
     data = next(iterator)
 
+    save_path = conf.get('savePath')
     replace_maxpool_with_stride = conf.get('replaceMaxpoolWithStride')
     channels = conf.get('channels')
     device = conf.get('device')
@@ -66,15 +69,15 @@ if __name__ == "__main__":
     mse = torch.nn.MSELoss()(predictions, aligned)
     brisque = piq.brisque(predictions)
     dss = piq.dss(predictions, aligned)
-    # dists = piq.DISTS()(predictions, aligned)
+    dists = piq.DISTS()(predictions, aligned)
 
-    print(f"PSNR:\t\t{psnr} dB")
-    print(f"SSIM:\t\t{ssim}")
-    print(f"MSE:\t\t{mse}")
-    print(f"BRISQUE:\t{brisque}")
-    print(f"DSS: \t\t{dss}")
-    # print(f"DISTS:\t\t{dists}")
+    now = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
+    save_string = f'{now}_eval_{model_name}'
 
+    with open(os.path.join(save_path, save_string), 'w') as f:
+        f.writelines([f"PSNR:\t\t{psnr} dB", f"\nSSIM:\t\t{ssim}", f"\nMSE:\t\t{mse}", f"\nBRISQUE:\t{brisque}", f"\nDSS: \t\t{dss}", f"\nDISTS:\t\t{dists}"])
+
+    f.close()
     show_results = conf.get("showResults")
 
     if show_results:

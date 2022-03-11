@@ -5,6 +5,7 @@ from pathlib import Path
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
+import matplotlib.pyplot as plt
 
 
 def get_files_in_dir_with_extension(dir_path,
@@ -108,7 +109,7 @@ class WoodCorrectionDataset(Dataset):
                 full_img = np.fliplr(full_img)
 
         # select random cut coordinates
-        r = random.randint(0 + self.max_shift, H - self.cut_h_full - self.max_shift)
+        r = random.randint(self.max_shift, H - self.cut_h_full - self.max_shift)
         c = random.randint(0, W - self.cut_w_full - self.max_shift)
 
         # true aligned cut
@@ -171,10 +172,11 @@ def main():
         border = torch.zeros(c, 2, w, device="cpu")
         cuts = torch.cat(tensors=[img[0], border], dim=1)
         cuts = torch.cat(tensors=[cuts, img[1]], dim=1)
-        #show_tensor(cuts)
-        pass
-    print(count)
-    pass
+
+
+        plt.figure()
+        plt.imshow(cuts.permute(1, 2, 0))
+        plt.waitforbuttonpress()
 
 
 if __name__ == '__main__':

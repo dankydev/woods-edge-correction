@@ -7,6 +7,7 @@ if __name__ == "__main__":
     from torchvision.utils import save_image
     import yaml
     from unet.model.unet import UNet
+    import kornia
 
     def show_tensor_image(image: torch.Tensor):
         plt.figure()
@@ -42,6 +43,8 @@ if __name__ == "__main__":
         return result_image
 
 
+    median_blur = kornia.filters.MedianBlur(kernel_size=(3, 3))
+
     # TODO: generalize range limits for even and odd numbers
     def correct_image_double_pass(image: torch.Tensor, verbose=True, portion_size=128):
         width_portions = image.size()[-1] // portion_size
@@ -54,6 +57,7 @@ if __name__ == "__main__":
         for p in range(0, width_portions, 2):
             portion_to_correct = image[:, :, p * portion_size:(p + 2) * portion_size]
             portion_corrected = model(torch.unsqueeze(portion_to_correct, 0))[0]
+            portion_corrected = median_blur(portion_corrected.unsqueeze(dim=0))[0]
             if result_image is None:
                 result_image = portion_corrected
             else:
@@ -67,6 +71,7 @@ if __name__ == "__main__":
         for p in range(1, width_portions - 1, 2):
             portion_to_correct = result_image[:, :, p * portion_size:(p + 2) * portion_size]
             portion_corrected = model(torch.unsqueeze(portion_to_correct, 0))[0]
+            portion_corrected = median_blur(portion_corrected.unsqueeze(dim=0))[0]
             result_image[:, :, (p + 1) * portion_size:(p + 2) * portion_size] = portion_corrected[:, :, portion_size:portion_size*2]
 
         if verbose:
@@ -77,6 +82,7 @@ if __name__ == "__main__":
         for p in range(2, width_portions, 2):
             portion_to_correct = result_image[:, :, p * portion_size:(p + 2) * portion_size]
             portion_corrected = model(torch.unsqueeze(portion_to_correct, 0))[0]
+            portion_corrected = median_blur(portion_corrected.unsqueeze(dim=0))[0]
             result_image[:, :, (p + 1) * portion_size:(p + 2) * portion_size] = portion_corrected[:, :, portion_size:portion_size*2]
 
         if verbose:
@@ -87,6 +93,7 @@ if __name__ == "__main__":
         for p in range(3, width_portions - 1, 2):
             portion_to_correct = result_image[:, :, p * portion_size:(p + 2) * portion_size]
             portion_corrected = model(torch.unsqueeze(portion_to_correct, 0))[0]
+            portion_corrected = median_blur(portion_corrected.unsqueeze(dim=0))[0]
             result_image[:, :, (p + 1) * portion_size:(p + 2) * portion_size] = portion_corrected[:, :, portion_size:portion_size*2]
 
         if verbose:
@@ -108,14 +115,16 @@ if __name__ == "__main__":
             if result_image is None:
                 portion_to_correct = get_portion(image, p, p+2, portion_size=portion_size)
                 portion_corrected = model(torch.unsqueeze(portion_to_correct, 0))[0]
+                portion_corrected = median_blur(portion_corrected.unsqueeze(dim=0))[0]
                 result_image = portion_corrected
             else:
                 # left_half_to_correct = result_image[:, :, -128:]
                 left_half_to_correct = get_portion(image, p, p+1, portion_size=portion_size)
                 right_half_to_correct = get_portion(image, p+1, p+2, portion_size=portion_size)
                 to_correct = torch.cat((left_half_to_correct, right_half_to_correct), dim=2)
-                corrected = model(torch.unsqueeze(to_correct, 0))[0]
-                result_image = torch.cat((result_image, corrected[:, :, portion_size:portion_size*2]), dim=2)
+                portion_corrected = model(torch.unsqueeze(to_correct, 0))[0]
+                portion_corrected = median_blur(portion_corrected.unsqueeze(dim=0))[0]
+                result_image = torch.cat((result_image, portion_corrected[:, :, portion_size:portion_size*2]), dim=2)
 
         if verbose:
             show_tensor_image(result_image)
@@ -131,7 +140,7 @@ if __name__ == "__main__":
             current_image = current_image.to('cpu')
 
             show_tensor_image(current_image)
-            corrected_image = correct_image_double_pass(current_image, verbose=True, portion_size=portion_size)
+            corrected_image = correct_image(current_image, verbose=True, portion_size=portion_size)
             show_tensor_image(corrected_image)
 
 

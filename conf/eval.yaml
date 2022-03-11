@@ -3,8 +3,8 @@ channels: 3
 replaceMaxpoolWithStride: true # uses stride instead of max-pooling to collapse data into the final feature map
 modelsDir: '../models/'
 device: 'cpu'
-evalModel: '2022-02-06-20-50-56_normvgg_ipermssim_unet_maxshift15_minshift0_mse0_vgglow1_msssim1000_vgghigh1_dists0_dss0_fsim0_lr0.0002_batch8_epochs100_freq100_replaceWithStrideTrue.pth'
-showResults: true
+evalModel: '2021-11-04-16-10-09_dss_dists_msssim_unet_maxshift15_minshift0_mse0_vgglow0_msssim1_vgghigh0_dists1_lr0.0002_batch8_epochs100_freq100_replaceWithStrideTrue.pth'
+showResults: false
 
 # DATASET
 evalDatasetPath: '../dataset/Legni02@resize_16x_TEST'
@@ -13,3 +13,5 @@ cutSizeW: 256
 maxShift: 15
 minShift: 0
 samples: 6 # null to get the whole dataset
+
+savePath: 'evals/'
